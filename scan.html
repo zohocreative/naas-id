@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verify ID — NAAS ID Portal</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-badge">🎓</div>
+      <div>
+        <div class="brand-name">NAAS ID Portal</div>
+        <div class="brand-sub">Scanned ID Verification</div>
+      </div>
+    </div>
+    <button class="link-btn" onclick="location.href='index.html'">← Home</button>
+  </div>
+
+  <div id="pinView" class="card center-card">
+    <h1>Verify Student</h1>
+    <p class="lead" id="pinIdLabel">Enter the phone number registered for this student to view their details.</p>
+    <label>Last 4 digits of phone number</label>
+    <input type="tel" id="pinInput" maxlength="4" placeholder="1234" autofocus>
+    <button class="btn" id="pinBtn" onclick="verifyPin()">Verify</button>
+    <div class="error-box" id="pinError"></div>
+  </div>
+
+  <div id="resultView" class="card" style="display:none;">
+    <div class="profile-header">
+      <img class="avatar" id="rAvatar" src="" alt="">
+      <div>
+        <div class="profile-name" id="rName"></div>
+        <div class="profile-meta" id="rMeta"></div>
+        <span class="badge" id="rTypeBadge" style="margin-top:8px;"></span>
+      </div>
+    </div>
+    <div class="stat-grid" id="rStats"></div>
+    <p class="hint" style="margin-top:24px;">This is a read-only verification view. For full history, login at the <a href="student.html">Student Portal</a>.</p>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script src="api.js"></script>
+<script>
+const studentId = (qs('id') || '').trim().toUpperCase();
+if (!studentId){
+  document.getElementById('pinIdLabel').textContent = 'No Student ID given. Scan a card\'s QR code again, or open the Student Portal directly.';
+  document.getElementById('pinInput').style.display = 'none';
+  document.getElementById('pinBtn').style.display = 'none';
+} else {
+  document.getElementById('pinIdLabel').textContent = 'Verifying ' + studentId + ' — enter the phone number on file to continue.';
+}
+
+async function verifyPin(){
+  const pin = document.getElementById('pinInput').value.trim();
+  const errBox = document.getElementById('pinError');
+  const btn = document.getElementById('pinBtn');
+  errBox.classList.remove('show');
+  if (!pin){ errBox.textContent = 'Enter the 4-digit PIN.'; errBox.classList.add('show'); return; }
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Checking...';
+  try {
+    const data = await apiProfilePin(studentId, pin);
+    showResult(data.profile);
+  } catch (e) {
+    errBox.textContent = e.message;
+    errBox.classList.add('show');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Verify';
+  }
+}
+
+function showResult(p){
+  document.getElementById('pinView').style.display = 'none';
+  const rv = document.getElementById('resultView');
+  rv.style.display = 'block';
+  document.getElementById('rAvatar').src = p.photoUrl || ('https://ui-avatars.com/api/?background=E7F7EF&color=0E9257&bold=true&name=' + encodeURIComponent(p.name));
+  document.getElementById('rName').textContent = p.name;
+  document.getElementById('rMeta').textContent = p.id + ' · ' + p.group + (p.instance ? ' · ' + p.instance : '');
+  const badge = document.getElementById('rTypeBadge');
+  badge.textContent = p.type === 'class' ? 'CLASS STUDENT' : 'COURSE STUDENT';
+  badge.className = 'badge ' + (p.type === 'class' ? 'class' : 'course');
+
+  let statsHtml = statTile('Status', 'Active', '');
+  if (p.attendancePct !== null && p.attendancePct !== undefined && p.attendancePct !== ''){
+    statsHtml += statTile('Attendance', Math.round(p.attendancePct*100) + '%', '');
+  }
+  const outstanding = p.type === 'class' ? p.totalOutstanding : p.balance;
+  statsHtml += statTile('Fees Pending', money(outstanding), outstanding > 0 ? 'danger' : '');
+  document.getElementById('rStats').innerHTML = statsHtml;
+}
+
+function statTile(label, value, extraClass){
+  return '<div class="stat-tile '+(extraClass||'')+'"><div class="num">'+value+'</div><div class="lbl">'+label+'</div></div>';
+}
+</script>
+</body>
+</html>

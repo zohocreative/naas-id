@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NAAS ID Portal</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-badge">🎓</div>
+      <div>
+        <div class="brand-name">NAAS ID Portal</div>
+        <div class="brand-sub">Students &amp; Parents · Fee Status · ID Cards</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="text-align:center;margin-top:30px;">
+    <h1 style="font-size:26px;">Welcome to NAAS Campus</h1>
+    <p class="lead">Check attendance, fees, and download your ID card — or manage students as an admin.</p>
+  </div>
+
+  <div class="choice-grid">
+    <div class="choice-card" onclick="location.href='student.html'">
+      <div class="choice-icon">🧑‍🎓</div>
+      <div class="choice-title">Student / Parent Portal</div>
+      <div class="choice-desc">Login with your Student ID and phone number to view your profile, attendance, fee status, and download your ID card.</div>
+    </div>
+    <div class="choice-card" onclick="location.href='admin.html'">
+      <div class="choice-icon">🛠️</div>
+      <div class="choice-title">Admin Panel</div>
+      <div class="choice-desc">Staff-only. Search all Course and Class students, view full profiles, and generate/print ID cards.</div>
+    </div>
+  </div>
+
+  <p class="hint" style="margin-top:40px;">Scanned an ID card's QR code? <a href="scan.html">Go here instead →</a></p>
+</div>
+</body>
+</html>

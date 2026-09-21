@@ -1,0 +1,164 @@
+/* NAAS ID Portal — shared design system.
+   Palette matches the NAAS Campus Sheet's own theme (black + green) so the
+   portal feels like the same product, not a bolt-on tool. */
+:root{
+  --black:#0E1113;
+  --ink:#13181C;
+  --green:#12B76A;
+  --green-dk:#0E9257;
+  --green-soft:#E7F7EF;
+  --green-mid:#A7E8C6;
+  --grey:#6B7280;
+  --border:#D9E2DD;
+  --amber:#F5A524;
+  --amber-soft:#FFF3D6;
+  --blue:#3B82F6;
+  --blue-soft:#E7F0FB;
+  --red:#E5484D;
+  --red-soft:#FCE4E4;
+  --bg:#F5F8F6;
+  --card:#FFFFFF;
+  --radius:18px;
+  --shadow:0 10px 30px rgba(14,17,19,0.08), 0 2px 8px rgba(14,17,19,0.04);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:"Poppins","Segoe UI",system-ui,sans-serif;
+  background:
+    radial-gradient(1200px 600px at 100% -10%, rgba(18,183,106,0.12), transparent),
+    radial-gradient(900px 500px at -10% 110%, rgba(59,130,246,0.08), transparent),
+    var(--bg);
+  min-height:100vh;
+  color:var(--ink);
+}
+.wrap{max-width:1100px;margin:0 auto;padding:28px 20px 60px;}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;}
+.brand{display:flex;align-items:center;gap:12px;}
+.brand-badge{
+  width:44px;height:44px;border-radius:14px;background:var(--black);
+  display:flex;align-items:center;justify-content:center;font-size:20px;
+  box-shadow:var(--shadow);
+}
+.brand-name{font-weight:700;font-size:18px;letter-spacing:0.2px;}
+.brand-sub{font-size:12px;color:var(--grey);}
+.link-btn{
+  background:none;border:none;color:var(--grey);font-size:13px;cursor:pointer;
+  text-decoration:underline;
+}
+.card{
+  background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);
+  padding:32px;border:1px solid rgba(14,17,19,0.04);
+}
+.center-card{max-width:440px;margin:60px auto;}
+h1{font-size:22px;margin:0 0 6px;}
+h2{font-size:18px;margin:0 0 14px;}
+p.lead{color:var(--grey);font-size:14px;margin:0 0 22px;}
+.choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:40px;}
+@media (max-width:600px){.choice-grid{grid-template-columns:1fr;}}
+.choice-card{
+  background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);
+  padding:30px 24px;cursor:pointer;border:2px solid transparent;transition:all .15s ease;
+  text-align:left;
+}
+.choice-card:hover{border-color:var(--green);transform:translateY(-2px);}
+.choice-icon{font-size:32px;margin-bottom:12px;}
+.choice-title{font-weight:700;font-size:17px;margin-bottom:6px;}
+.choice-desc{font-size:13px;color:var(--grey);}
+label{display:block;font-size:12px;font-weight:600;color:var(--grey);margin:16px 0 6px;text-transform:uppercase;letter-spacing:0.4px;}
+input[type=text],input[type=password],input[type=tel],input[type=search]{
+  width:100%;padding:12px 14px;border-radius:12px;border:1.5px solid var(--border);
+  font-size:15px;font-family:inherit;background:#FCFEFD;
+}
+input:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 3px var(--green-soft);}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  background:var(--green);color:#fff;border:none;border-radius:12px;
+  padding:13px 20px;font-size:15px;font-weight:600;cursor:pointer;width:100%;margin-top:18px;
+  transition:background .15s ease;
+}
+.btn:hover{background:var(--green-dk);}
+.btn.secondary{background:var(--black);}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--border);}
+.btn.small{width:auto;padding:9px 16px;font-size:13px;margin-top:0;}
+.error-box{
+  background:var(--red-soft);color:#9B2226;padding:12px 14px;border-radius:10px;
+  font-size:13px;margin-top:16px;display:none;
+}
+.error-box.show{display:block;}
+.hint{font-size:12px;color:var(--grey);margin-top:14px;text-align:center;}
+
+/* ---- dashboard layout ---- */
+.profile-header{display:flex;gap:20px;align-items:center;flex-wrap:wrap;}
+.avatar{
+  width:84px;height:84px;border-radius:50%;object-fit:cover;background:var(--green-soft);
+  border:3px solid var(--green-soft);
+}
+.profile-name{font-size:20px;font-weight:700;}
+.profile-meta{color:var(--grey);font-size:13px;margin-top:4px;}
+.badge{
+  display:inline-block;padding:4px 12px;border-radius:999px;font-size:11px;font-weight:700;
+  letter-spacing:0.4px;text-transform:uppercase;
+}
+.badge.course{background:var(--green-soft);color:var(--green-dk);}
+.badge.class{background:var(--blue-soft);color:#1D4ED8;}
+.badge.status-paid{background:var(--green-soft);color:var(--green-dk);}
+.badge.status-partial{background:var(--amber-soft);color:#946200;}
+.badge.status-pending,.badge.status-overdue{background:var(--red-soft);color:#9B2226;}
+
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-top:24px;}
+.stat-tile{background:var(--green-soft);border-radius:14px;padding:16px;}
+.stat-tile .num{font-size:22px;font-weight:700;color:var(--green-dk);}
+.stat-tile .lbl{font-size:12px;color:var(--grey);margin-top:2px;}
+.stat-tile.warn{background:var(--amber-soft);}
+.stat-tile.warn .num{color:#946200;}
+.stat-tile.danger{background:var(--red-soft);}
+.stat-tile.danger .num{color:#9B2226;}
+
+table.months{width:100%;border-collapse:collapse;margin-top:14px;font-size:13px;}
+table.months th,table.months td{padding:9px 10px;text-align:left;border-bottom:1px solid var(--border);}
+table.months th{color:var(--grey);font-weight:600;font-size:11px;text-transform:uppercase;}
+
+.section-title{font-size:14px;font-weight:700;margin:28px 0 4px;color:var(--ink);}
+
+/* ---- ID card ---- */
+.idcard{
+  width:340px;border-radius:20px;overflow:hidden;box-shadow:var(--shadow);
+  font-family:"Poppins","Segoe UI",sans-serif;background:#fff;margin:0 auto;
+}
+.idcard.theme-course .idcard-top{background:linear-gradient(135deg,#0E9257,#12B76A);}
+.idcard.theme-class .idcard-top{background:linear-gradient(135deg,#1D4ED8,#3B82F6);}
+.idcard-top{padding:18px 20px 40px;color:#fff;position:relative;}
+.idcard-org{font-size:11px;letter-spacing:1.5px;opacity:.85;text-transform:uppercase;}
+.idcard-title{font-size:16px;font-weight:700;margin-top:2px;}
+.idcard-type-badge{
+  position:absolute;top:16px;right:18px;background:rgba(255,255,255,0.22);
+  padding:4px 10px;border-radius:999px;font-size:9px;font-weight:700;letter-spacing:0.5px;
+}
+.idcard-body{padding:0 20px 20px;margin-top:-30px;}
+.idcard-photo{
+  width:76px;height:76px;border-radius:16px;border:4px solid #fff;object-fit:cover;
+  background:#eee;box-shadow:0 4px 10px rgba(0,0,0,0.15);
+}
+.idcard-name{font-size:17px;font-weight:700;margin-top:10px;}
+.idcard-id{font-size:12px;color:var(--grey);font-family:monospace;letter-spacing:0.5px;}
+.idcard-row{display:flex;justify-content:space-between;font-size:12px;margin-top:10px;border-top:1px dashed var(--border);padding-top:10px;}
+.idcard-row div{flex:1;}
+.idcard-row .lbl{color:var(--grey);font-size:10px;text-transform:uppercase;letter-spacing:0.3px;}
+.idcard-row .val{font-weight:600;margin-top:2px;}
+.idcard-footer{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:#FAFBFA;border-top:1px solid var(--border);}
+.idcard-qr img,.idcard-qr canvas{width:64px;height:64px;}
+.idcard-footer-note{font-size:9px;color:var(--grey);max-width:190px;line-height:1.4;}
+
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+.list-row{
+  display:flex;align-items:center;justify-content:space-between;padding:12px 14px;
+  border-radius:12px;cursor:pointer;transition:background .12s ease;
+}
+.list-row:hover{background:var(--green-soft);}
+.list-row .li-left{display:flex;align-items:center;gap:12px;}
+.list-avatar{width:38px;height:38px;border-radius:10px;object-fit:cover;background:var(--border);}
+.list-name{font-weight:600;font-size:14px;}
+.list-sub{font-size:12px;color:var(--grey);}

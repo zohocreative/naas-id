@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Portal — NAAS ID Portal</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-badge">🎓</div>
+      <div>
+        <div class="brand-name">NAAS ID Portal</div>
+        <div class="brand-sub">Student / Parent Portal</div>
+      </div>
+    </div>
+    <button class="link-btn" onclick="location.href='index.html'">← Home</button>
+  </div>
+
+  <!-- LOGIN VIEW -->
+  <div id="loginView" class="card center-card">
+    <h1>Student Login</h1>
+    <p class="lead">Enter your Student ID and the phone number on file.</p>
+    <label>Student ID</label>
+    <input type="text" id="loginId" placeholder="STU-000001-C">
+    <label>Phone Number</label>
+    <input type="tel" id="loginPhone" placeholder="07XXXXXXXX">
+    <button class="btn" id="loginBtn" onclick="doLogin()">Login</button>
+    <div class="error-box" id="loginError"></div>
+    <p class="hint">Don't know your Student ID? Ask your instructor or NAAS Campus office.</p>
+  </div>
+
+  <!-- DASHBOARD VIEW -->
+  <div id="dashView" style="display:none;">
+    <div class="card">
+      <div class="profile-header">
+        <img class="avatar" id="dAvatar" src="" alt="">
+        <div>
+          <div class="profile-name" id="dName"></div>
+          <div class="profile-meta" id="dMeta"></div>
+          <span class="badge" id="dTypeBadge" style="margin-top:8px;"></span>
+        </div>
+        <div style="margin-left:auto;">
+          <button class="btn ghost small" onclick="logoutStudent()">Logout</button>
+        </div>
+      </div>
+
+      <div class="stat-grid" id="dStats"></div>
+
+      <div id="dMonthsSection" style="display:none;">
+        <div class="section-title">Monthly Fee History</div>
+        <table class="months" id="dMonthsTable"></table>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:20px;text-align:center;">
+      <h2 style="text-align:left;">Your ID Card</h2>
+      <div id="dCardHost"></div>
+      <button class="btn secondary" style="max-width:300px;margin:18px auto 0;" onclick="downloadIdCardPng(dCurrentProfile.id)">⬇ Download ID Card (PNG)</button>
+    </div>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script src="api.js"></script>
+<script src="idcard.js"></script>
+<script>
+let dCurrentProfile = null;
+
+async function doLogin(){
+  const id = document.getElementById('loginId').value.trim().toUpperCase();
+  const phone = document.getElementById('loginPhone').value.trim();
+  const errBox = document.getElementById('loginError');
+  const btn = document.getElementById('loginBtn');
+  errBox.classList.remove('show');
+  if (!id || !phone){ errBox.textContent = 'Enter both Student ID and phone number.'; errBox.classList.add('show'); return; }
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Checking...';
+  try {
+    const data = await apiLogin(id, phone);
+    dCurrentProfile = data.profile;
+    sessionStorage.setItem('naas_student_id', id);
+    sessionStorage.setItem('naas_student_phone', phone);
+    showDashboard(data.profile);
+  } catch (e) {
+    errBox.textContent = e.message;
+    errBox.classList.add('show');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Login';
+  }
+}
+
+function logoutStudent(){
+  sessionStorage.removeItem('naas_student_id');
+  sessionStorage.removeItem('naas_student_phone');
+  location.reload();
+}
+
+function showDashboard(p){
+  document.getElementById('loginView').style.display = 'none';
+  document.getElementById('dashView').style.display = 'block';
+  document.getElementById('dAvatar').src = p.photoUrl || ('https://ui-avatars.com/api/?background=E7F7EF&color=0E9257&bold=true&name=' + encodeURIComponent(p.name));
+  document.getElementById('dName').textContent = p.name;
+  document.getElementById('dMeta').textContent = p.id + ' · ' + p.group + (p.instance ? ' · ' + p.instance : '');
+  const badge = document.getElementById('dTypeBadge');
+  badge.textContent = p.type === 'class' ? 'CLASS STUDENT' : 'COURSE STUDENT';
+  badge.className = 'badge ' + (p.type === 'class' ? 'class' : 'course');
+
+  const stats = document.getElementById('dStats');
+  let statsHtml = '';
+  if (p.attendancePct !== null && p.attendancePct !== undefined && p.attendancePct !== ''){
+    statsHtml += statTile('Attendance', Math.round(p.attendancePct*100) + '%', '');
+  }
+  if (p.type === 'class'){
+    statsHtml += statTile('Outstanding Balance', money(p.totalOutstanding), p.totalOutstanding > 0 ? 'danger' : '');
+    statsHtml += statTile('Fee / Month', money(p.feeDefaultPerMonth), '');
+  } else {
+    statsHtml += statTile('Balance Due', money(p.balance), p.balance > 0 ? 'danger' : '');
+    statsHtml += statTile('Total Paid', money(p.paid), '');
+    statsHtml += statTile('Fee Status', p.feeStatus || '—', p.feeStatus === 'Pending' || p.feeStatus==='Overdue' ? 'warn' : '');
+  }
+  stats.innerHTML = statsHtml;
+
+  if (p.type === 'class' && p.months && p.months.length){
+    document.getElementById('dMonthsSection').style.display = 'block';
+    let rows = '<tr><th>Month</th><th>Due</th><th>Paid</th><th>Balance</th><th>Status</th></tr>';
+    p.months.forEach(function(m){
+      if (!m.due && !m.paid) return; // skip untouched future months
+      rows += '<tr><td>'+escapeHtml(m.month)+'</td><td>'+money(m.due)+'</td><td>'+money(m.paid)+'</td><td>'+money(m.balance)+'</td>' +
+              '<td><span class="badge status-'+m.status.toLowerCase()+'">'+escapeHtml(m.status||'—')+'</span></td></tr>';
+    });
+    document.getElementById('dMonthsTable').innerHTML = rows;
+  }
+
+  renderIdCard(document.getElementById('dCardHost'), p);
+}
+
+function statTile(label, value, extraClass){
+  return '<div class="stat-tile '+(extraClass||'')+'"><div class="num">'+value+'</div><div class="lbl">'+label+'</div></div>';
+}
+
+// auto-login if a session already exists
+(async function(){
+  const sid = sessionStorage.getItem('naas_student_id');
+  const sphone = sessionStorage.getItem('naas_student_phone');
+  if (sid && sphone){
+    try {
+      const data = await apiLogin(sid, sphone);
+      dCurrentProfile = data.profile;
+      showDashboard(data.profile);
+    } catch (e) { /* session invalid, stay on login */ }
+  }
+})();
+</script>
+</body>
+</html>
